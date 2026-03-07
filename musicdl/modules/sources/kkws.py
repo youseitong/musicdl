@@ -55,7 +55,8 @@ class KKWSMusicClient(BaseMusicClient):
             search_results.append({"id": item_id, "name": name, "format": file_format, "size": size, "share_time": share_time, "singer": singer, "detail_url": href})
         return search_results
     '''_extractlyricsandquark'''
-    def _extractlyricsandquark(self, html_text: str, song_id: str):
+    def _extractlyricsandquark(self, html_text: str, song_id: str, request_overrides: dict = None):
+        request_overrides = request_overrides or {}
         tb = (soup := BeautifulSoup(html_text, "lxml")).select_one("#textbox")
         to_mmss_func = lambda t: (lambda s: f"{s//60:02d}:{s%60:02d}")(int(float(t.split(":",1)[0])*60+float(t.split(":",1)[1])) if ":" in t else int(float(t)))
         lyrics = "" if not tb else "\n".join((f"[{to_mmss_func(m.group(1))}] {m.group(2).strip()}" if (m:=re.match(r"^\[(\d+(?:\.\d+)?|\d{1,2}:\d{2}(?:\.\d+)?)\]\s*(.*)$", line)) else f"{line}") for line in (l.strip() for l in tb.get_text("\n").splitlines()) if line)
@@ -65,7 +66,7 @@ class KKWSMusicClient(BaseMusicClient):
             args = re.findall(r"'([^']*)'", onclick); name = fmt = url = None
             if (parsed := ((args[1], args[2], args[3] or None) if onclick.startswith("openModel") and len(args) >= 4 else (args[1], args[2], None) if onclick.startswith("mbgotourl") and len(args) >= 3 else None)) is None: continue
             name_fmt, url, fmt = parsed; name, fmt = ((lambda n, f2: (n, fmt or f2))(*map(str.strip, name_fmt.split("|", 1))) if "|" in name_fmt else (name_fmt.strip(), fmt))
-            try: url = resp2json(self.get(f'https://www.kkws.cc/getdown?url={url}&j=1&id={song_id}', allow_redirects=True))['data']['decrypted_url']
+            try: url = resp2json(self.get(f'https://www.kkws.cc/getdown?url={url}&j=1&id={song_id}', allow_redirects=True, **request_overrides))['data']['decrypted_url']
             except Exception: url = url
             if not (url and "pan.quark.cn" in url): continue
             e = url_map.setdefault(url, {"url": url, "formats": set(), "names": set()})
@@ -88,7 +89,7 @@ class KKWSMusicClient(BaseMusicClient):
                 # --download results
                 if not isinstance(search_result, dict) or ('detail_url' not in search_result) or ('id' not in search_result): continue
                 song_info = SongInfo(source=self.source)
-                try: (resp := self.get(search_result['detail_url'], **request_overrides)).raise_for_status(); download_result = self._extractlyricsandquark(resp.text, search_result['id'])
+                try: (resp := self.get(search_result['detail_url'], **request_overrides)).raise_for_status(); download_result = self._extractlyricsandquark(resp.text, search_result['id'], request_overrides)
                 except Exception: continue
                 for quark_info in download_result['quark_links']:
                     download_result['quark_parse_result'], download_url = QuarkParser.parsefromurl(quark_info['url'], **self.quark_parser_config)
