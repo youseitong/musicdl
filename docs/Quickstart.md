@@ -213,6 +213,7 @@ print(MusicClientBuilder.REGISTERED_MODULES)
 From musicdl v2.9.0 onward, support for downloading user playlists from each platform will be added gradually. The platforms currently supported are as follows:
 
 - [FiveSingMusicClient | 5SING音乐](https://5sing.kugou.com/index.html)
+- [JamendoMusicClient | 简音乐 (欧美流行音乐)](https://www.jamendo.com/)
 - [JooxMusicClient | QQ音乐海外版](https://www.joox.com/hk)
 - [KuwoMusicClient | 酷我音乐](http://www.kuwo.cn/)
 - [KugouMusicClient | 酷狗音乐](https://www.kugou.com/)
@@ -225,6 +226,7 @@ Specifically, you only need to run the following command in the terminal, musicd
 
 ```sh
 musicdl -p "https://5sing.kugou.com/yeluoluo/dj/631b3fa72418b11003089b8d.html" -m FiveSingMusicClient
+musicdl -p "https://www.jamendo.com/playlist/500544876/best-of-february-2020" -m JamendoMusicClient
 musicdl -p "https://www.joox.com/hk/playlist/MqgK_LYD3Sb3I9Iziq+8NA==" -m JooxMusicClient
 musicdl -p "https://www.kuwo.cn/playlist_detail/2358858706" -m KuwoMusicClient
 musicdl -p "https://www.kugou.com/yy/special/single/3280341.html" -m KugouMusicClient
