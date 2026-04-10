@@ -7,6 +7,7 @@ WeChat Official Account (微信公众号):
     Charles的皮卡丘
 '''
 from bs4 import BeautifulSoup
+from contextlib import suppress
 from rich.progress import Progress
 from ..sources import BaseMusicClient
 from urllib.parse import urljoin, urlparse
@@ -68,12 +69,13 @@ class FLMP3MusicClient(BaseMusicClient):
             for search_result in self._parsesearchresultsfromhtml(resp.text):
                 # --download results
                 if not isinstance(search_result, dict) or ('song_url' not in search_result): continue
-                song_info = SongInfo(source=self.source)
-                try: (resp := self.get(search_result['song_url'], **request_overrides)).raise_for_status(); download_result = self._parsesongdetailfordownloadpages(resp.text)
-                except Exception: continue
-                for download_page_details in download_result['links_sorted']:
-                    try: (resp := self.get(download_page_details['url'], **request_overrides)).raise_for_status(); soup = BeautifulSoup(resp.text, "lxml"); quark_download_url = soup.select_one("a.linkbtn[href]")['href']
-                    except Exception: continue
+                song_info = SongInfo(source=self.source, raw_data={'search': search_result, 'download': {}, 'lyric': {}})
+                with suppress(Exception): (resp := self.get(search_result['song_url'], **request_overrides)).raise_for_status()
+                if not locals().get('resp') or not hasattr(locals().get('resp'), 'text'): continue
+                for download_page_details in (download_result := self._parsesongdetailfordownloadpages(resp.text))['links_sorted']:
+                    with suppress(Exception): (dresp := self.get(download_page_details['url'], **request_overrides)).raise_for_status()
+                    if not locals().get('dresp') or not hasattr(locals().get('dresp'), 'text'): continue
+                    soup = BeautifulSoup(dresp.text, "lxml"); quark_download_url = soup.select_one("a.linkbtn[href]").get('href')
                     if not quark_download_url or not str(quark_download_url).startswith('http'): continue
                     download_result['quark_parse_result'], download_url = QuarkParser.parsefromurl(quark_download_url, **self.quark_parser_config)
                     if not download_url or not str(download_url).startswith('http'): continue
@@ -84,6 +86,7 @@ class FLMP3MusicClient(BaseMusicClient):
                         identifier=download_result['song_id'], duration_s=duration_in_secs, duration=SongInfoUtils.seconds2hms(duration_in_secs), lyric='NULL', cover_url=search_result.get('img_url'), download_url=download_url_status['download_url'], download_url_status=download_url_status, default_download_headers=self.quark_default_download_headers,
                     )
                     if song_info.with_valid_download_url and song_info.ext in AudioLinkTester.VALID_AUDIO_EXTS: break
+                # --append to song_infos
                 if song_info.with_valid_download_url: song_infos.append(song_info)
                 # --judgement for search_size
                 if self.strict_limit_search_size_per_page and len(song_infos) >= self.search_size_per_page: break
