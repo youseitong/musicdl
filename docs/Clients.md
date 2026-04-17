@@ -610,7 +610,7 @@ To use QQMusicClient, you do not need any extra command-line tools such as ffmpe
 
 #### SodaMusicClient
 
-
+[Soda Music](https://www.douyin.com/qishui/) is Douyin’s official music streaming app, designed to help users discover and enjoy personalized songs anytime, anywhere.
 
 Music from the above-mentioned platform can be fetched using SodaMusicClient.
 
@@ -624,27 +624,67 @@ SodaMusicClient offers an out-of-the-box experience: no extra CLI tools like ffm
 
 - Simple usage for searching and downloading songs, with login cookies:
 
+  `musicdl -m SodaMusicClient -i "{'SodaMusicClient': {'default_search_cookies': 'YOUR_COOKIES'}}"`
+
 - Basic usage for playlist parsing and downloading, without login cookies:
 
+  `musicdl -p "https://qishui.douyin.com/s/ix9JA2oW" -m SodaMusicClient`
+
 - Simple usage for playlist parsing and downloading, with login cookies:
+
+  `musicdl -p "https://qishui.douyin.com/s/ix9JA2oW" -m SodaMusicClient -i "{'SodaMusicClient': {'default_parse_cookies': 'YOUR_COOKIES'}}"`
 
 (2) Invoke It in Python
 
 - Basic usage for song search and download, without login cookies:
 
+  ```python
+  from musicdl import musicdl
+
+  music_client = musicdl.MusicClient(music_sources=['SodaMusicClient'])
+  music_client.startcmdui()
+  ```
+
 - Simple usage for searching and downloading songs, with login cookies:
+
+  ```python
+  from musicdl import musicdl
+  
+  your_vip_cookies_with_str_or_dict_format = ''
+  init_music_clients_cfg = {
+    'SodaMusicClient': {
+        'default_search_cookies': your_vip_cookies_with_str_or_dict_format,
+    }
+  }
+  music_client = musicdl.MusicClient(music_sources=['SodaMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  music_client.startcmdui()
+  ```
 
 - Basic usage for playlist parsing and downloading, without login cookies:
 
+  ```python
+  from musicdl import musicdl
+
+  music_client = musicdl.MusicClient(music_sources=['SodaMusicClient'])
+  song_infos = music_client.parseplaylist("https://qishui.douyin.com/s/ix9JA2oW")
+  music_client.download(song_infos=song_infos)
+  ```
+
 - Simple usage for playlist parsing and downloading, with login cookies:
 
-
-
-
-
-
-
-
+  ```python
+  from musicdl import musicdl
+  
+  your_vip_cookies_with_str_or_dict_format = ''
+  init_music_clients_cfg = {
+    'SodaMusicClient': {
+        'default_parse_cookies': your_vip_cookies_with_str_or_dict_format,
+    }
+  }
+  music_client = musicdl.MusicClient(music_sources=['SodaMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  song_infos = music_client.parseplaylist("https://qishui.douyin.com/s/ix9JA2oW")
+  music_client.download(song_infos=song_infos)
+  ```
 
 #### StreetVoiceMusicClient
 
