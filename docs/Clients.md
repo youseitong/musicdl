@@ -810,11 +810,11 @@ With JooxMusicClient, there is no extra dependency on CLI tools such as ffmpeg o
 
 #### LizhiMusicClient
 
-[Lizhi FM](https://www.lizhi.fm/) is a Chinese audio platform and podcast community whose slogan is "Everyone can be a podcaster."
+[Lizhi FM](https://www.lizhi.fm/) is a Chinese audio-sharing platform and podcast community built around the idea that "Everyone can be a podcaster."
 
 LizhiMusicClient is the right tool for downloading audio content from the platform above.
 
-LizhiMusicClient requires nothing beyond pip install musicdl — no extra CLI tools, no complicated setup.
+LizhiMusicClient works out of the box with just pip install musicdl — no extra CLI tools or complicated setup required.
 
 (1) Command-Line Usage
 
