@@ -162,7 +162,7 @@ KugouMusicClient works out of the box with no need for extra CLI dependencies su
 
 - Simple usage for playlist parsing and downloading, with login cookies:
 
-  `musicdl -p "https://www.kugou.com/yy/special/single/18170.html" -m KugouMusicClient -i "{'KugouMusicClient': {'default_search_cookies': 'YOUR_COOKIES', 'default_download_cookies': 'YOUR_COOKIES'}}"`
+  `musicdl -p "https://www.kugou.com/yy/special/single/18170.html" -m KugouMusicClient -i "{'KugouMusicClient': {'default_parse_cookies': 'YOUR_COOKIES', 'default_download_cookies': 'YOUR_COOKIES'}}"`
 
 (2) Invoke It in Python
 
