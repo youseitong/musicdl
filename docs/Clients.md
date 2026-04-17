@@ -688,39 +688,81 @@ SodaMusicClient offers an out-of-the-box experience: no extra CLI tools like ffm
 
 #### StreetVoiceMusicClient
 
+[StreetVoice](https://www.streetvoice.cn/) is a music platform that helps independent artists share their work, reach new listeners, and grow through playlists, charts, discovery features, and a creator-focused community.
+
 To download music from the platform above, we can use StreetVoiceMusicClient.
+
+Since StreetVoice audio files are delivered in HLS format, downloading music from the platform with StreetVoiceMusicClient requires the command-line tool [FFmpeg](https://www.ffmpeg.org/).
 
 (1) Command-Line Usage
 
 - Basic usage for song search and download, without login cookies:
 
+  `musicdl -m StreetVoiceMusicClient`
+
 - Simple usage for searching and downloading songs, with login cookies:
+
+  `musicdl -m StreetVoiceMusicClient -i "{'StreetVoiceMusicClient': {'default_search_cookies': 'YOUR_COOKIES'}}"`
 
 - Basic usage for playlist parsing and downloading, without login cookies:
 
+  `musicdl -p "https://www.streetvoice.cn/svmusic_cn/playlists/964546/" -m StreetVoiceMusicClient`
+
 - Simple usage for playlist parsing and downloading, with login cookies:
+
+  `musicdl -p "https://www.streetvoice.cn/svmusic_cn/playlists/964546/" -m StreetVoiceMusicClient -i "{'StreetVoiceMusicClient': {'default_parse_cookies': 'YOUR_COOKIES'}}"`
 
 (2) Invoke It in Python
 
 - Basic usage for song search and download, without login cookies:
 
+  ```python
+  from musicdl import musicdl
+
+  music_client = musicdl.MusicClient(music_sources=['StreetVoiceMusicClient'])
+  music_client.startcmdui()
+  ```
+
 - Simple usage for searching and downloading songs, with login cookies:
+
+  ```python
+  from musicdl import musicdl
+  
+  your_vip_cookies_with_str_or_dict_format = ''
+  init_music_clients_cfg = {
+    'StreetVoiceMusicClient': {
+        'default_search_cookies': your_vip_cookies_with_str_or_dict_format,
+    }
+  }
+  music_client = musicdl.MusicClient(music_sources=['StreetVoiceMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  music_client.startcmdui()
+  ```
 
 - Basic usage for playlist parsing and downloading, without login cookies:
 
+  ```python
+  from musicdl import musicdl
+
+  music_client = musicdl.MusicClient(music_sources=['StreetVoiceMusicClient'])
+  song_infos = music_client.parseplaylist("https://www.streetvoice.cn/svmusic_cn/playlists/964546/")
+  music_client.download(song_infos=song_infos)
+  ```
+
 - Simple usage for playlist parsing and downloading, with login cookies:
 
-
-
-
-
-
-
-
-
-
-
-
+  ```python
+  from musicdl import musicdl
+  
+  your_vip_cookies_with_str_or_dict_format = ''
+  init_music_clients_cfg = {
+    'StreetVoiceMusicClient': {
+        'default_parse_cookies': your_vip_cookies_with_str_or_dict_format,
+    }
+  }
+  music_client = musicdl.MusicClient(music_sources=['StreetVoiceMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  song_infos = music_client.parseplaylist("https://www.streetvoice.cn/svmusic_cn/playlists/964546/")
+  music_client.download(song_infos=song_infos)
+  ```
 
 ## Global Streaming / Indie
 
