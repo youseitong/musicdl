@@ -954,7 +954,71 @@ QingtingMusicClient keeps things easy: no additional CLI tools to install, just 
 
 (1) Command-Line Usage
 
+- Search and Download Tracks from This Platform
+
+  `musicdl -m QingtingMusicClient -i "{'QingtingMusicClient': {'search_size_per_source': 2, 'allowed_search_types': ['track']}}"`
+
+- Search and Download Albums from This Platform
+
+  `musicdl -m QingtingMusicClient -i "{'QingtingMusicClient': {'search_size_per_source': 2, 'allowed_search_types': ['album']}}"`
+
+- Search for and Download Tracks and Albums from This Platform
+
+  `musicdl -m QingtingMusicClient -i "{'QingtingMusicClient': {'search_size_per_source': 2, 'allowed_search_types': ['track', 'album']}}"`
+
+- Search & Download Tracks and Albums Using Your Own Premium Account Cookies
+  
+  Manually extracting the cookies for a QingTing FM VIP account from the browser can be cumbersome and error-prone 
+  (have to capture the network traffic yourself on the QingTing FM web client. Look for an AJAX request with the keyword "auth"). 
+  To simplify the process, we provide the [build_cookies_for_qingtingfm.py](https://github.com/CharlesPikachu/musicdl/tree/master/scripts/build_cookies_for_qingtingfm.py) script, which helps generate the QingTing FM VIP account cookies in the format expected by musicdl.
+  A successful output will look roughly like this:
+  `{"errorno": 0, "errormsg": "", "data": {"qingting_id": "xxx", "access_token": "xxx", "refresh_token": "xxx", "expires_in": 7200}}`
+  
+  Then, you can use QingtingMusicClient in the same way as any other music client by simply passing in the membership cookies, as shown below:
+
+  `musicdl -m QingtingMusicClient -i "{'QingtingMusicClient': {'search_size_per_source': 2, 'allowed_search_types': ['track', 'album'], 'default_search_cookies': 'YOUR_COOKIES'}}"`
+
 (2) Invoke It in Python
+
+- Search and Download Tracks from This Platform
+
+  ```python
+  from musicdl import musicdl
+
+  init_music_clients_cfg = {'QingtingMusicClient': {'search_size_per_source': 2, 'allowed_search_types': ['track']}}
+  music_client = musicdl.MusicClient(music_sources=['QingtingMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  music_client.startcmdui()
+  ```
+
+- Search and Download Albums from This Platform
+
+  ```python
+  from musicdl import musicdl
+
+  init_music_clients_cfg = {'QingtingMusicClient': {'search_size_per_source': 2, 'allowed_search_types': ['album']}}
+  music_client = musicdl.MusicClient(music_sources=['QingtingMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  music_client.startcmdui()
+  ```
+
+- Search for and Download Tracks and Albums from This Platform
+
+  ```python
+  from musicdl import musicdl
+
+  init_music_clients_cfg = {'QingtingMusicClient': {'search_size_per_source': 2, 'allowed_search_types': ['track', 'album']}}
+  music_client = musicdl.MusicClient(music_sources=['QingtingMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  music_client.startcmdui()
+  ```
+
+- Search & Download Tracks and Albums Using Your Own Premium Account Cookies
+
+  ```python
+  from musicdl import musicdl
+
+  init_music_clients_cfg = {'QingtingMusicClient': {'search_size_per_source': 2, 'allowed_search_types': ['track', 'album'], 'default_search_cookies': 'YOUR_COOKIES'}}
+  music_client = musicdl.MusicClient(music_sources=['QingtingMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  music_client.startcmdui()
+  ```
 
 #### XimalayaMusicClient
 
