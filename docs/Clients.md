@@ -800,8 +800,73 @@ JamendoMusicClient requires only a pip installation of musicdl, with no addition
 
 (1) Command-Line Usage
 
+- Basic usage for song search and download, without login cookies:
+
+  `musicdl -m JamendoMusicClient`
+
+- Simple usage for searching and downloading songs, with login cookies:
+
+  `musicdl -m JamendoMusicClient -i "{'JamendoMusicClient': {'default_search_cookies': 'YOUR_COOKIES'}}"`
+
+- Basic usage for playlist parsing and downloading, without login cookies:
+
+  `musicdl -p "https://www.jamendo.com/playlist/500362331/demo" -m JamendoMusicClient`
+
+- Simple usage for playlist parsing and downloading, with login cookies:
+
+  `musicdl -p "https://www.jamendo.com/playlist/500362331/demo" -m JamendoMusicClient -i "{'JamendoMusicClient': {'default_parse_cookies': 'YOUR_COOKIES'}}"`
+
 (2) Invoke It in Python
 
+- Basic usage for song search and download, without login cookies:
+
+  ```python
+  from musicdl import musicdl
+
+  music_client = musicdl.MusicClient(music_sources=['JamendoMusicClient'])
+  music_client.startcmdui()
+  ```
+
+- Simple usage for searching and downloading songs, with login cookies:
+
+  ```python
+  from musicdl import musicdl
+  
+  your_vip_cookies_with_str_or_dict_format = ''
+  init_music_clients_cfg = {
+    'JamendoMusicClient': {
+        'default_search_cookies': your_vip_cookies_with_str_or_dict_format,
+    }
+  }
+  music_client = musicdl.MusicClient(music_sources=['JamendoMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  music_client.startcmdui()
+  ```
+
+- Basic usage for playlist parsing and downloading, without login cookies:
+
+  ```python
+  from musicdl import musicdl
+
+  music_client = musicdl.MusicClient(music_sources=['JamendoMusicClient'])
+  song_infos = music_client.parseplaylist("https://www.jamendo.com/playlist/500362331/demo")
+  music_client.download(song_infos=song_infos)
+  ```
+
+- Simple usage for playlist parsing and downloading, with login cookies:
+
+  ```python
+  from musicdl import musicdl
+  
+  your_vip_cookies_with_str_or_dict_format = ''
+  init_music_clients_cfg = {
+    'JamendoMusicClient': {
+        'default_parse_cookies': your_vip_cookies_with_str_or_dict_format,
+    }
+  }
+  music_client = musicdl.MusicClient(music_sources=['JamendoMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  song_infos = music_client.parseplaylist("https://www.jamendo.com/playlist/500362331/demo")
+  music_client.download(song_infos=song_infos)
+  ```
 
 #### JooxMusicClient
 
@@ -820,6 +885,9 @@ With JooxMusicClient, there is no extra dependency on CLI tools such as ffmpeg o
 - Simple usage for searching and downloading songs, with login cookies:
 
   `musicdl -m JooxMusicClient -i "{'JooxMusicClient': {'default_search_cookies': 'YOUR_COOKIES'}}"`
+  
+  If you’re unsure which cookies to use, you can run the [build_cookies_for_joox.py](https://github.com/CharlesPikachu/musicdl/blob/master/scripts/build_cookies_for_joox.py) script included in this repository to generate cookies in the format required by musicdl. 
+  Just fill in your own premium account credentials in the appropriate section of the script.
 
 - Basic usage for playlist parsing and downloading, without login cookies:
 
@@ -831,6 +899,55 @@ With JooxMusicClient, there is no extra dependency on CLI tools such as ffmpeg o
 
 (2) Invoke It in Python
 
+- Basic usage for song search and download, without login cookies:
+
+  ```python
+  from musicdl import musicdl
+
+  music_client = musicdl.MusicClient(music_sources=['JooxMusicClient'])
+  music_client.startcmdui()
+  ```
+
+- Simple usage for searching and downloading songs, with login cookies:
+
+  ```python
+  from musicdl import musicdl
+  
+  your_vip_cookies_with_str_or_dict_format = ''
+  init_music_clients_cfg = {
+    'JooxMusicClient': {
+        'default_search_cookies': your_vip_cookies_with_str_or_dict_format,
+    }
+  }
+  music_client = musicdl.MusicClient(music_sources=['JooxMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  music_client.startcmdui()
+  ```
+
+- Basic usage for playlist parsing and downloading, without login cookies:
+
+  ```python
+  from musicdl import musicdl
+
+  music_client = musicdl.MusicClient(music_sources=['JooxMusicClient'])
+  song_infos = music_client.parseplaylist("https://www.joox.com/hk/playlist/5HTvfy7AAW9QJHPqM+T0+w==")
+  music_client.download(song_infos=song_infos)
+  ```
+
+- Simple usage for playlist parsing and downloading, with login cookies:
+
+  ```python
+  from musicdl import musicdl
+  
+  your_vip_cookies_with_str_or_dict_format = ''
+  init_music_clients_cfg = {
+    'JooxMusicClient': {
+        'default_parse_cookies': your_vip_cookies_with_str_or_dict_format,
+    }
+  }
+  music_client = musicdl.MusicClient(music_sources=['JooxMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  song_infos = music_client.parseplaylist("https://www.joox.com/hk/playlist/5HTvfy7AAW9QJHPqM+T0+w==")
+  music_client.download(song_infos=song_infos)
+  ```
 
 #### QobuzMusicClient (Built-in Premium Account)
 
@@ -851,7 +968,10 @@ With QobuzMusicClient, you do not need extra CLI tools like ffmpeg or N_m3u8DL-R
   `musicdl -m QobuzMusicClient -i "{'QobuzMusicClient': {'default_search_cookies': 'YOUR_COOKIES'}}"`
   
   The cookies should be provided either as a dictionary in the format `{"x-user-auth-token": "xxx", ...}` or as a cookie string such as `x-user-auth-token=xxx; ...`. 
-  The `x-user-auth-token` field is required, while any other fields are optional.
+  The `x-user-auth-token` field is required, while any other fields are optional. 
+  
+  For convenience, the GitHub repo also includes a script named [build_cookies_for_qobuz.py](https://github.com/CharlesPikachu/musicdl/blob/master/scripts/build_cookies_for_qobuz.py), which can generate subscriber cookies in the format required by musicdl in one go. 
+  All you need to do is enter your own subscriber account credentials in the appropriate section of the code and run the script.
 
 - Basic usage for playlist parsing and downloading, without login cookies:
 
