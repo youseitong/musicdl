@@ -878,6 +878,9 @@ To use SoundCloudMusicClient, you will need a few extra CLI tools, including [FF
 - Simple usage for searching and downloading songs, with login cookies:
 
   `musicdl -m SoundCloudMusicClient -i "{'SoundCloudMusicClient': {'default_search_cookies': 'YOUR_COOKIES'}}"`
+  
+  Note that the cookies must be provided in the format `{'oauth_token': 'OAuth xxx', 'client_id': 'xxx'}`. 
+  When the `oauth_token` is obtained by capturing it from the web client of your own membership account rather than through the official channel, the corresponding `client_id` is also required.
 
 - Basic usage for playlist parsing and downloading, without login cookies:
 
@@ -891,11 +894,53 @@ To use SoundCloudMusicClient, you will need a few extra CLI tools, including [FF
 
 - Basic usage for song search and download, without login cookies:
 
+  ```python
+  from musicdl import musicdl
+
+  music_client = musicdl.MusicClient(music_sources=['SoundCloudMusicClient'])
+  music_client.startcmdui()
+  ```
+
 - Simple usage for searching and downloading songs, with login cookies:
+
+  ```python
+  from musicdl import musicdl
+  
+  your_vip_cookies_with_str_or_dict_format = ''
+  init_music_clients_cfg = {
+    'SoundCloudMusicClient': {
+        'default_search_cookies': your_vip_cookies_with_str_or_dict_format,
+    }
+  }
+  music_client = musicdl.MusicClient(music_sources=['SoundCloudMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  music_client.startcmdui()
+  ```
 
 - Basic usage for playlist parsing and downloading, without login cookies:
 
+  ```python
+  from musicdl import musicdl
+
+  music_client = musicdl.MusicClient(music_sources=['SoundCloudMusicClient'])
+  song_infos = music_client.parseplaylist("https://soundcloud.com/raudymithut/sets/sets-from-dj-raudy-mit-hut")
+  music_client.download(song_infos=song_infos)
+  ```
+
 - Simple usage for playlist parsing and downloading, with login cookies:
+
+  ```python
+  from musicdl import musicdl
+  
+  your_vip_cookies_with_str_or_dict_format = ''
+  init_music_clients_cfg = {
+    'SoundCloudMusicClient': {
+        'default_parse_cookies': your_vip_cookies_with_str_or_dict_format,
+    }
+  }
+  music_client = musicdl.MusicClient(music_sources=['SoundCloudMusicClient'], init_music_clients_cfg=init_music_clients_cfg)
+  song_infos = music_client.parseplaylist("https://soundcloud.com/raudymithut/sets/sets-from-dj-raudy-mit-hut")
+  music_client.download(song_infos=song_infos)
+  ```
 
 #### SpotifyMusicClient (Built-in Premium Account)
 
