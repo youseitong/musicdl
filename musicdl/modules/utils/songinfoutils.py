@@ -38,8 +38,10 @@ class SongInfoUtils:
     @staticmethod
     def supplsonginfothensavelyricsthenwritetags(song_info: SongInfo, logger_handle: LoggerHandle, disable_print: bool, auto_save_lyrics_then_write_tags: bool = True, enable_whisperlrc: bool = False) -> SongInfo:
         # correct file size
-        song_info.file_size_bytes = (path := Path(song_info.save_path)).stat().st_size
+        try: song_info.file_size_bytes = (path := Path(song_info.save_path)).stat().st_size
+        except Exception: song_info.file_size_bytes = 0
         song_info.file_size = SongInfoUtils.byte2mb(size=song_info.file_size_bytes)
+        if not song_info.file_size_bytes: return song_info
         # tinytag parse
         try: tag = TinyTag.get(str(path))
         except Exception as err: logger_handle.warning(f'SongInfoUtils.supplsonginfothensavelyricsthenwritetags >>> {str(path)} (Err: {err})', disable_print=disable_print); tag = None

@@ -11,7 +11,7 @@ import math
 from itertools import chain
 from contextlib import suppress
 from rich.progress import Progress
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 from ..sources import BaseMusicClient
 from ..utils import legalizestring, resp2json, usesearchheaderscookies, safeextractfromdict, SongInfo, SongInfoUtils, AudioLinkTester
 
@@ -24,8 +24,8 @@ class LRTSMusicClient(BaseMusicClient):
         self.allowed_search_types = list(set(kwargs.pop('allowed_search_types', LRTSMusicClient.ALLOWED_SEARCH_TYPES)))
         super(LRTSMusicClient, self).__init__(**kwargs)
         self.default_search_headers = {
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7", "accept-encoding": "gzip, deflate, br, zstd", "accept-language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7", "cache-control": "max-age=0", "connection": "keep-alive", "sec-ch-ua": '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"',
-            "host": "m.lrts.me", "sec-ch-ua-mobile": "?0", "sec-ch-ua-platform": '"Windows"', "sec-fetch-dest": "document", "sec-fetch-mode": "navigate", "sec-fetch-site": "none", "sec-fetch-user": "?1", "upgrade-insecure-requests": "1", "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+            "accept": "application/json, text/plain, */*", "accept-encoding": "gzip, deflate", "accept-language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7", "cache-control": "max-age=0", "connection": "keep-alive", "referer": "https://m.lrts.me/", "x-requested-with": "XMLHttpRequest",
+            "sec-ch-ua": '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"', "sec-ch-ua-mobile": "?0", "sec-ch-ua-platform": '"Windows"', "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
         }
         self.default_download_headers = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"}
         self.default_headers = self.default_search_headers
@@ -143,7 +143,12 @@ class LRTSMusicClient(BaseMusicClient):
     @usesearchheaderscookies
     def _search(self, keyword: str = '', search_url: dict = '', request_overrides: dict = None, song_infos: list = [], progress: Progress = None, progress_id: int = 0):
         # init
-        request_overrides, search_type, search_url = request_overrides or {}, list(search_url.keys())[0], list(search_url.values())[0]
+        request_overrides, search_type, search_url = dict(request_overrides or {}), list(search_url.keys())[0], list(search_url.values())[0]
+        headers = dict(request_overrides.get('headers', {}) or {})
+        headers.setdefault('accept', 'application/json, text/plain, */*')
+        headers.setdefault('x-requested-with', 'XMLHttpRequest')
+        headers.setdefault('referer', f'https://m.lrts.me/search?keyWord={quote(keyword)}')
+        request_overrides['headers'] = headers
         # successful
         try:
             # --search results
