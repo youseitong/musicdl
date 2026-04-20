@@ -6,6 +6,7 @@ Author:
 WeChat Official Account (微信公众号):
     Charles的皮卡丘
 '''
+from __future__ import annotations
 import sys
 import copy
 import click
@@ -78,7 +79,7 @@ class MusicClient():
         print(BASIC_INFO % (__version__, ', '.join([f'"{v} for {k}"' for k, v in self.work_dirs.items()])))
         printfullline(ch='-')
     '''printandselectsearchresults'''
-    def printandselectsearchresults(self, search_results: dict[str, list[SongInfo]]) -> list[SongInfo]:
+    def printandselectsearchresults(self, search_results: dict[str, list[SongInfo]], select_mode: str = 'interactive') -> list[SongInfo]:
         print_titles, print_items, song_infos, row_ids, song_info_pointer = ['ID', 'Singers', 'Songname', 'Filesize', 'Duration', 'Album', 'Source'], [], {}, [], 0
         for _, per_search_results in search_results.items():
             for search_result in per_search_results:
@@ -90,7 +91,16 @@ class MusicClient():
                 ])
         if not print_items: self.logger_handle.warning('No songs found from %s' % ', '.join(self.music_sources)); return []
         print(smarttrunctable(headers=print_titles, rows=print_items, no_trunc_cols=[0, 1, 3, 4, 6]))
-        picked_ids = cursorpickintable(print_titles, print_items, row_ids, no_trunc_cols=[0, 1, 3, 4, 6])
+        if select_mode == 'interactive':
+            picked_ids = cursorpickintable(print_titles, print_items, row_ids, no_trunc_cols=[0, 1, 3, 4, 6])
+        elif select_mode == 'first':
+            picked_ids = row_ids[:1]
+        elif select_mode == 'all':
+            picked_ids = row_ids
+        elif select_mode == 'none':
+            picked_ids = []
+        else:
+            raise ValueError(f'Invalid select_mode: {select_mode}')
         selected_rows = [id2row[i] for i in picked_ids if i in (id2row := dict(zip(row_ids, print_items)))]
         print("\nNo songs selected.\n") if not selected_rows else (print("\nSelected songs:\n"), print(smarttrunctable(headers=print_titles, rows=selected_rows, no_trunc_cols=[0, 1, 3, 4, 6])))
         return [song_infos[i] for i in picked_ids if i in song_infos]
@@ -152,7 +162,9 @@ class MusicClient():
 @click.option('-r', '--requests-overrides', '--requests_overrides', default=None, help='Requests.get / Requests.post kwargs such as `headers` and `proxies` for each music client as a JSON string.', type=str, show_default=True)
 @click.option('-c', '--clients-threadings', '--clients_threadings', default=None, help='Number of threads used for each music client as a JSON string.', type=str, show_default=True)
 @click.option('-s', '--search-rules', '--search_rules', default=None, help='Search rules for each music client as a JSON string.', type=str, show_default=True)
-def MusicClientCMD(keyword: str, playlist_url: str, music_sources: str, init_music_clients_cfg: str, requests_overrides: str, clients_threadings: str, search_rules: str):
+@click.option('--select', 'select_mode', default='interactive', type=click.Choice(['interactive', 'first', 'all', 'none']), show_default=True, help='How to select results when downloading by keyword.')
+@click.option('--select-episodes', 'select_episodes_mode', default=None, type=click.Choice(['interactive', 'first', 'all', 'none']), show_default=True, help='How to select episodes when a result contains episodes. Defaults to --select.')
+def MusicClientCMD(keyword: str, playlist_url: str, music_sources: str, init_music_clients_cfg: str, requests_overrides: str, clients_threadings: str, search_rules: str, select_mode: str, select_episodes_mode: str | None):
     # parse playlist url
     assert keyword is None or playlist_url is None, '"playlist_url" and "keyword" could not be set simultaneously'
     # load json string
@@ -166,9 +178,9 @@ def MusicClientCMD(keyword: str, playlist_url: str, music_sources: str, init_mus
     if (keyword is None) and (playlist_url is None): music_client.startcmdui()
     elif playlist_url is not None: print(music_client); music_client.download(song_infos=music_client.parseplaylist(playlist_url))
     else:
-        print(music_client); selected_song_infos, final_selected_song_infos = music_client.printandselectsearchresults(search_results=music_client.search(keyword=keyword)), []
+        print(music_client); selected_song_infos, final_selected_song_infos = music_client.printandselectsearchresults(search_results=music_client.search(keyword=keyword), select_mode=select_mode), []
         for song_info in selected_song_infos:
-            if song_info.episodes: final_selected_song_infos.extend(music_client.printandselectsearchresults({song_info.source: song_info.episodes}))
+            if song_info.episodes: final_selected_song_infos.extend(music_client.printandselectsearchresults({song_info.source: song_info.episodes}, select_mode=select_episodes_mode or select_mode))
             else: final_selected_song_infos.append(song_info)
         music_client.download(song_infos=final_selected_song_infos)
 
