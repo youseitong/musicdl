@@ -79,7 +79,7 @@ class LRTSMusicClient(BaseMusicClient):
         return song_info
     '''_parsebybook'''
     def _parsebybook(self, search_results, song_infos: list = [], request_overrides: dict = None, progress: Progress = None):
-        for search_result in search_results['data']['bookResult']['list']:
+        for search_result in search_results.get('data', {}).get('bookResult', {}).get('list', []):
             if (not isinstance(search_result, dict)) or (not (book_id := search_result.get('id'))): continue
             download_results, tracks, page_size, unique_track_ids, request_overrides = [], [], 50, set(), dict(request_overrides or {})
             song_info = SongInfo(
@@ -90,7 +90,9 @@ class LRTSMusicClient(BaseMusicClient):
             download_book_pid = progress.add_task(f"{self.source}._parsebybook >>> (0/{num_pages}) pages downloaded in book {book_id}", total=num_pages)
             for page_num_idx, page_num in enumerate(range(1, num_pages + 1)):
                 if page_num_idx > 0: progress.advance(download_book_pid, 1); progress.update(download_book_pid, description=f"{self.source}._parsebybook >>> ({page_num_idx}/{num_pages}) pages downloaded in book {book_id}")
-                with suppress(Exception): download_results.append(resp2json(self.get(f'https://m.lrts.me/ajax/getBookMenu?bookId={book_id}&pageNum={page_num}&pageSize={page_size}&sortType=0', **request_overrides)))
+                with suppress(Exception):
+                    resp = self.get(f'https://m.lrts.me/ajax/getBookMenu?bookId={book_id}&pageNum={page_num}&pageSize={page_size}&sortType=0', **request_overrides)
+                    if hasattr(resp, 'json'): download_results.append(resp.json())
             progress.advance(download_book_pid, 1); progress.update(download_book_pid, description=f"{self.source}._parsebybook >>> ({page_num_idx+1}/{num_pages}) pages downloaded in book {book_id}")
             for track in chain.from_iterable((safeextractfromdict(download_result, ['list'], []) or []) for download_result in download_results):
                 if (not isinstance(track, dict)) or (not track.get('id')) or (track.get('id') in unique_track_ids): continue
@@ -111,7 +113,7 @@ class LRTSMusicClient(BaseMusicClient):
         return song_infos
     '''_parsebyalbum'''
     def _parsebyalbum(self, search_results, song_infos: list = [], request_overrides: dict = None, progress: Progress = None):
-        for search_result in search_results['data']['albumResult']['list']:
+        for search_result in search_results.get('data', {}).get('albumResult', {}).get('list', []):
             if (not isinstance(search_result, dict)) or (not (album_id := search_result.get('id'))): continue
             download_results, tracks, unique_track_ids, request_overrides = [], [], set(), dict(request_overrides or {})
             song_info = SongInfo(
@@ -119,9 +121,10 @@ class LRTSMusicClient(BaseMusicClient):
                 ext=None, file_size_bytes=None, file_size=None, identifier=album_id, duration_s=None, duration='-:-:-', lyric=None, cover_url=search_result.get('cover'), download_url=None, download_url_status={}, episodes=[],
             )
             download_album_pid = progress.add_task(f"{self.source}._parsebyalbum >>> (0/1) pages downloaded in album {album_id}", total=1)
-            with suppress(Exception): (resp := self.get(f'https://m.lrts.me/ajax/getAlbumAudios?ablumnId={album_id}&sortType=0')).raise_for_status()
-            if not locals().get('resp') or not hasattr(locals().get('resp'), 'text'): continue
-            download_results.append(resp2json(resp=resp)); del resp; progress.advance(download_album_pid, 1); progress.update(download_album_pid, description=f"{self.source}._parsebyalbum >>> (1/1) pages downloaded in album {album_id}")
+            with suppress(Exception): 
+                resp = self.get(f'https://m.lrts.me/ajax/getAlbumAudios?ablumnId={album_id}&sortType=0')
+                if hasattr(resp, 'json'): download_results.append(resp.json())
+            progress.advance(download_album_pid, 1); progress.update(download_album_pid, description=f"{self.source}._parsebyalbum >>> (1/1) pages downloaded in album {album_id}")
             for track in chain.from_iterable((safeextractfromdict(download_result, ['list'], []) or []) for download_result in download_results):
                 if (not isinstance(track, dict)) or (not track.get('audioId')) or (track.get('audioId') in unique_track_ids): continue
                 unique_track_ids.add(track.get('audioId')); tracks.append(track)
